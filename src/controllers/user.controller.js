@@ -1,5 +1,6 @@
 const CreateUser = require('../use-cases/create-user');
 const DeleteUser = require('../use-cases/delete-user');
+const UpdateUser = require('../use-cases/update-user');
 
 async function createUser(req, res) {
     try {
@@ -37,7 +38,27 @@ async function deleteUser(req, res) {
     }
 }
 
+async function updateUser(req, res) {
+    try {
+        const _id = req.params._id;
+        const { password, newPassword, newUsername } = req.body;
+
+        const updateUser = new UpdateUser();
+
+        const updated = await updateUser.execute({ _id, password, newPassword, newUsername });
+
+        return res.status(200).json({
+            message: 'User updated successfully',
+            _id: updated._id
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: 'An error occurred while updating the user', details: err.message });
+    }
+}
+
 module.exports = {
     createUser,
-    deleteUser
+    deleteUser,
+    updateUser
 }

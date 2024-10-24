@@ -29,7 +29,24 @@ async function getUserByEmail(email) {
 
 async function deleteUser(_id) {
     try {
-        return User.findByIdAndDelete(_id);
+        const now = new Date();
+        return User.findByIdAndUpdate(_id, { deletedAt: now });
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function updateUser({ _id, password, username }) {
+    try {
+        const updateData = {};
+        if (password) {
+            updateData.password = password;
+        }
+        if (username) {
+            updateData.username = username;
+        }
+        console.log(updateData, password, username);
+        return User.findByIdAndUpdate(_id, updateData, { new: true });
     } catch (err) {
         throw err;
     }
@@ -39,5 +56,6 @@ module.exports = {
     createUser,
     getUserById,
     getUserByEmail,
-    deleteUser
+    deleteUser,
+    updateUser
 }
