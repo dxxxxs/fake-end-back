@@ -11,9 +11,9 @@ async function createUser({ username, email, password }) {
     }
 }
 
-async function getUserById(id) {
+async function getUserById(_id) {
     try {
-        return User.findById(id);
+        return User.findById(_id);
     } catch (err) {
         throw err;
     }
@@ -27,8 +27,17 @@ async function getUserByEmail(email) {
     }
 }
 
+async function deleteUser(_id) {
+    try {
+        return User.findByIdAndDelete(_id);
+    } catch (err) {
+        throw err;
+    }
+}
+
 module.exports = {
     createUser,
     getUserById,
-    getUserByEmail
+    getUserByEmail,
+    deleteUser
 }

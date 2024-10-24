@@ -1,4 +1,5 @@
 const CreateUser = require('../use-cases/create-user');
+const DeleteUser = require('../use-cases/delete-user');
 
 async function createUser(req, res) {
     try {
@@ -6,11 +7,11 @@ async function createUser(req, res) {
 
         const createUser = new CreateUser();
 
-        const user = await createUser.execute({ username, email, password });
+        const { _id } = await createUser.execute({ username, email, password });
 
         return res.status(200).json({
             message: 'User created successfully',
-            user: user
+            _id
         });
 
     } catch (err) {
@@ -18,6 +19,25 @@ async function createUser(req, res) {
     }
 }
 
+async function deleteUser(req, res) {
+    try {
+        const _id = req.params._id;
+
+        const deleteUser = new DeleteUser();
+
+        const deleted = await deleteUser.execute(_id);
+
+        return res.status(200).json({
+            message: 'User deleted successfully',
+            _id: deleted._id
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: 'An error occurred while deleting the user', details: err.message });
+    }
+}
+
 module.exports = {
-    createUser
+    createUser,
+    deleteUser
 }
