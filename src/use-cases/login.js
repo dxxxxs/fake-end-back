@@ -10,8 +10,6 @@ class Login {
 
         const secret = process.env.JWT_SECRET;
 
-        console.log(secret);
-
         if (!user || user.deletedAt) {
             throw new Error('User not found');
         }

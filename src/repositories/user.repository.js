@@ -45,7 +45,6 @@ async function updateUser({ _id, password, username }) {
         if (username) {
             updateData.username = username;
         }
-        console.log(updateData, password, username);
         return User.findByIdAndUpdate(_id, updateData, { new: true });
     } catch (err) {
         throw err;

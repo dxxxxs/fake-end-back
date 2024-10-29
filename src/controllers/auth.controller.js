@@ -27,8 +27,6 @@ async function login(req, res) {
 
         const { user, token } = await login.execute({ email, password });
 
-        console.log(user, token);
-
         return res.status(200).json({
             message: 'User logged in successfully',
             _id: user._id,
