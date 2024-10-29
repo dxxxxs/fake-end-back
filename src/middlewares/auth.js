@@ -16,7 +16,7 @@ const authMiddleware = async (req, res, next) => {
 
         const token = authHeader.split(' ')[1];
 
-        const decoded = await jwt.verify(token, secret);
+        const decoded = jwt.verify(token, secret);
         req.decoded = decoded;
         next();
 
