@@ -13,16 +13,12 @@ const endpointSchema = new mongoose.Schema({
     responseDelay: { type: Number, required: false },
 }, { timestamps: true });
 
-const endpointCollectionSchema = new mongoose.Schema({
-    endpoints: { type: [endpointSchema], default: [] }
-})
-
 function getEndpointModel(userId) {
-    const collectionName = `EndpointCollection_${userId}`;
+    const collectionName = `Endpoint_${userId}`;
     if (mongoose.models[collectionName]) {
         return mongoose.models[collectionName];
     }
-    return mongoose.model(collectionName, endpointCollectionSchema, collectionName);
+    return mongoose.model(collectionName, endpointSchema, collectionName);
 }
 
 module.exports = getEndpointModel;

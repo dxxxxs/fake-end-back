@@ -4,13 +4,11 @@ async function createEndpoint(userId, endpointData) {
     try {
         const EndpointModel = getEndpointModel(userId);
 
-        const userEndpoints = await EndpointModel.findOneAndUpdate(
-            {},
-            { $push: { endpoints: endpointData } },
-            { new: true, upsert: true }
-        );
+        const newEndpoint = new EndpointModel(endpointData);
 
-        return userEndpoints;
+        await newEndpoint.save();
+
+        return newEndpoint;
 
     } catch (err) {
         throw new Error(`Failed to create endpoint: ${err.message}`);
@@ -21,11 +19,7 @@ async function deleteEndpoint(userId, endpointId) {
     try {
         const EndpointModel = getEndpointModel(userId);
 
-        const result = await EndpointModel.findOneAndUpdate(
-            {},
-            { $pull: { endpoints: { _id: endpointId } } },
-            { new: true }
-        );
+        const result = await EndpointModel.findByIdAndDelete(endpointId);
 
         if (!result) {
             throw new Error('Endpoint not found');
@@ -42,9 +36,9 @@ async function getEndpoints(userId) {
     try {
         const EndpointModel = getEndpointModel(userId);
 
-        const userEndpoints = await EndpointModel.findOne({});
+        const userEndpoints = await EndpointModel.find({});
 
-        return userEndpoints ? userEndpoints.endpoints : [];
+        return userEndpoints;
 
     } catch (err) {
         throw new Error(`Failed to get endpoints: ${err.message}`);
@@ -55,15 +49,12 @@ async function getEndpointByPathAndMethod(userId, path, method) {
     try {
         const EndpointModel = getEndpointModel(userId);
 
-        const endpoint = await EndpointModel.findOne({
-            'endpoints.path': path,
-            'endpoints.method': method
-        }, { 'endpoints.$': 1 });
+        const endpoint = await EndpointModel.findOne({ path, method });
 
-        return endpoint ? endpoint.endpoints.find(ep => ep.path === path && ep.method === method) : null;
+        return endpoint;
 
     } catch (err) {
-        throw err;
+        throw new Error(`Failed to find endpoint by path and method: ${err.message}`);
     }
 }
 
@@ -72,4 +63,4 @@ module.exports = {
     deleteEndpoint,
     getEndpoints,
     getEndpointByPathAndMethod
-}
+};
