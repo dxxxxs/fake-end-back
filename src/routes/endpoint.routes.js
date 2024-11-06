@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post('/', authMiddleware, controller.createEndpoint);
 router.delete('/:endpointId', authMiddleware, controller.deleteEndpoint);
+router.patch('/:endpointId', authMiddleware, controller.updateEndpoint);
 
 module.exports = router;

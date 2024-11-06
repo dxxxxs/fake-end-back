@@ -1,8 +1,12 @@
 const endpointRepository = require('../repositories/endpoint.repository');
 const EndpointValidator = require('../utils/validators/endpointValidator');
 
-class CreateEndpoint {
-    async execute({ userId, endpointData }) {
+class UpdateEndpoint {
+    async execute({ userId, endpointId, endpointData }) {
+
+        if (!endpointId) {
+            throw new Error('Endpoint ID is required');
+        }
 
         if (!endpointData) {
             throw new Error('Endpoint data is missing');
@@ -14,13 +18,12 @@ class CreateEndpoint {
 
         const existingEndpoint = await endpointRepository.getEndpointByPathAndMethod(userId, endpointData.path, endpointData.method);
 
-        if (existingEndpoint) {
-            throw new Error(`An endpoint already exist on path: ${endpointData.path} and method: ${endpointData.method}`);
+        if (!existingEndpoint) {
+            throw new Error(`Endpoint does not exist on path: ${endpointData.path} and method: ${endpointData.method}`);
         }
 
-        return await endpointRepository.createEndpoint(userId, endpointData);
-
+        return await endpointRepository.updateEndpoint(userId, endpointId, endpointData);
     }
 }
 
-module.exports = CreateEndpoint;
+module.exports = UpdateEndpoint;

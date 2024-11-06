@@ -1,5 +1,6 @@
 const CreateEndpoint = require('../use-cases/create-endpoint');
 const DeleteEndpoint = require('../use-cases/delete-endpoint');
+const UpdateEndpoint = require('../use-cases/update-endpoint');
 
 async function createEndpoint(req, res) {
     try {
@@ -8,11 +9,11 @@ async function createEndpoint(req, res) {
 
         const createEndpoint = new CreateEndpoint();
 
-        const endpoints = await createEndpoint.execute({ userId: _id, endpointData });
+        const endpoint = await createEndpoint.execute({ userId: _id, endpointData });
 
         return res.status(200).json({
             message: 'Endpoint created successfully',
-            data: endpoints
+            data: endpoint
         });
 
     } catch (err) {
@@ -27,18 +28,40 @@ async function deleteEndpoint(req, res) {
 
         const deleteEndpoint = new DeleteEndpoint();
 
-        const endpoints = await deleteEndpoint.execute({ userId: _id, endpointId });
+        const endpoint = await deleteEndpoint.execute({ userId: _id, endpointId });
 
         return res.status(200).json({
             message: 'Endpoint deleted successfully',
-            data: endpoints
-        })
+            data: endpoint
+        });
+
     } catch (err) {
         return res.status(500).json({ error: 'An error ocurred while deleting the endpoint', details: err.message });
     }
 }
 
+async function updateEndpoint(req, res) {
+    try {
+        const endpointId = req.params.endpointId;
+        const { _id } = req.decoded;
+        const { endpointData } = req.body;
+
+        const updateEndpoint = new UpdateEndpoint();
+
+        const endpoint = await updateEndpoint.execute({ userId: _id, endpointId, endpointData });
+
+        return res.status(200).json({
+            message: 'Endpoint updated successfully',
+            data: endpoint
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: 'An error ocurred while updating the endpoint', details: err.message });
+    }
+}
+
 module.exports = {
     createEndpoint,
-    deleteEndpoint
+    deleteEndpoint,
+    updateEndpoint
 }
