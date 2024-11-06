@@ -1,6 +1,7 @@
 const CreateEndpoint = require('../use-cases/create-endpoint');
 const DeleteEndpoint = require('../use-cases/delete-endpoint');
 const UpdateEndpoint = require('../use-cases/update-endpoint');
+const GetAllEndpoints = require('../use-cases/get-all-endpoints');
 
 async function createEndpoint(req, res) {
     try {
@@ -60,8 +61,26 @@ async function updateEndpoint(req, res) {
     }
 }
 
+async function getEndpoints(req, res) {
+    try {
+        const { _id } = req.decoded;
+
+        const getAllEndpoints = new GetAllEndpoints();
+
+        const endpoints = await getAllEndpoints.execute(_id);
+
+        return res.status(200).json({
+            data: endpoints
+        });
+
+    } catch (err) {
+        return res.status(500).json({ error: 'An error ocurred while getting the endpoints', details: err.message });
+    }
+}
+
 module.exports = {
     createEndpoint,
     deleteEndpoint,
-    updateEndpoint
+    updateEndpoint,
+    getEndpoints
 }
