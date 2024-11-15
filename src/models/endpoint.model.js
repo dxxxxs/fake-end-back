@@ -11,6 +11,8 @@ const endpointSchema = new mongoose.Schema({
     description: { type: String, required: false },
     isActive: { type: Boolean, default: true },
     responseDelay: { type: Number, required: false },
+    responseBody: { type: mongoose.Schema.Types.Mixed, required: false },
+    responseHeaders: { type: mongoose.Schema.Types.Mixed, required: false }
 }, { timestamps: true });
 
 function getEndpointModel(userId) {

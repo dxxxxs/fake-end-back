@@ -58,6 +58,19 @@ async function getEndpointByPathAndMethod(userId, path, method) {
     }
 }
 
+async function getEndpointById(userId, endpointId) {
+    try {
+        const EndpointModel = getEndpointModel(userId);
+
+        const endpoint = await EndpointModel.findById(endpointId);
+
+        return endpoint;
+
+    } catch (err) {
+        throw new Error(`Failed to find endpoint by _id: ${err.message}`);
+    }
+}
+
 async function updateEndpoint(userId, endpointId, updateData) {
     try {
         const EndpointModel = getEndpointModel(userId);
@@ -84,5 +97,6 @@ module.exports = {
     deleteEndpoint,
     getEndpoints,
     getEndpointByPathAndMethod,
-    updateEndpoint
+    updateEndpoint,
+    getEndpointById
 };

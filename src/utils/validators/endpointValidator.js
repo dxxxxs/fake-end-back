@@ -25,7 +25,7 @@ class EndpointValidator {
             throw new Error('Endpoint body must be a plain object');
         }
 
-        if (!/^\/[a-zA-Z0-9\-_/]*$/.test(endpointData.path)) {
+        if (!/^\/[a-zA-Z0-9\-_/:]*$/.test(endpointData.path)) {
             throw new Error('Endpoint path is not valid');
         }
 

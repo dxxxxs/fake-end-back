@@ -16,7 +16,7 @@ class UpdateEndpoint {
 
         endpointValidator.validateEndpointData(endpointData);
 
-        const existingEndpoint = await endpointRepository.getEndpointByPathAndMethod(userId, endpointData.path, endpointData.method);
+        const existingEndpoint = await endpointRepository.getEndpointById(userId, endpointId);
 
         if (!existingEndpoint) {
             throw new Error(`Endpoint does not exist on path: ${endpointData.path} and method: ${endpointData.method}`);
