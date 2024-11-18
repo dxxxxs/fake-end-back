@@ -10,7 +10,9 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.10.0",
     "mongoose": "^8.7.2",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "parseurl": "^1.3.3",
+    "path-to-regexp": "^8.2.0"
   },
   "scripts": {
     "start:dev": "node --watch src/index.js"

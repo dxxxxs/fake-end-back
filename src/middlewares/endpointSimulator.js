@@ -1,4 +1,6 @@
 const { faker } = require('@faker-js/faker');
+const { pathToRegexp, match } = require('path-to-regexp');
+const parseurl = require('parseurl');
 const endpointRepository = require('../repositories/endpoint.repository');
 
 function generateFakerData(template) {
@@ -9,7 +11,6 @@ function generateFakerData(template) {
         return null;
     }
 }
-
 
 function processResponse(response, pathParams = {}) {
     if (typeof response === 'object' && response !== null) {
@@ -37,46 +38,40 @@ function processResponse(response, pathParams = {}) {
 async function endpointSimulator(req, res) {
     try {
         const { userId } = req.params;
-        const fullPath = `/${req.params[0] || ''}`;
+        const parsedUrl = parseurl(req);
+        const fullPath = parsedUrl.pathname.replace(`/${userId}`, '');
         const method = req.method.toUpperCase();
-        const path_splitted = fullPath.trim().split('/').slice(1);
+
         const endpoints = await endpointRepository.getEndpoints(userId);
 
-        let endpoint;
-        let pathParams = {};
-
-        if (endpoints && endpoints.length > 0) {
-            for (const item of endpoints) {
-                const endpointParts = item.path.trim().split('/').slice(1);
-
-                const matchedParams = matchPath(path_splitted, endpointParts);
-                if (matchedParams && item.method === method) {
-                    endpoint = item;
-                    pathParams = matchedParams;
-                    break;
-                }
-            }
-
-            if (endpoint) {
-                console.log('Matched endpoint:', endpoint);
-                console.log('Path parameters:', pathParams);
-            } else {
-                console.log('No matching endpoint found.');
-            }
-        } else {
+        if (!endpoints || endpoints.length === 0) {
             console.log('No endpoints found for user:', userId);
+            return res.status(404).json({ error: 'No endpoints configured' });
         }
 
+        let matchedEndpoint;
+        let pathParams = {};
 
-        if (!endpoint) {
+        for (const endpoint of endpoints) {
+            const matchFn = match(endpoint.path, { decode: decodeURIComponent });
+            const matched = matchFn(fullPath);
+
+            if (matched && endpoint.method === method) {
+                matchedEndpoint = endpoint;
+                pathParams = matched.params;
+                break;
+            }
+        }
+
+        if (!matchedEndpoint) {
             return res.status(404).json({ error: 'Endpoint not found or inactive' });
         }
 
-        if (!endpoint.isActive) {
+        if (!matchedEndpoint.isActive) {
             return res.status(403).json({ error: 'Endpoint is inactive' });
         }
 
-        const { responseHeaders, responseBody, responseDelay, statusCode } = endpoint;
+        const { responseHeaders, responseBody, responseDelay, statusCode } = matchedEndpoint;
 
         if (responseHeaders) {
             const processedHeaders = processResponse(responseHeaders);
@@ -90,7 +85,6 @@ async function endpointSimulator(req, res) {
         }
 
         const processedBody = processResponse(responseBody || {}, pathParams);
-
         return res.status(statusCode || 200).json(processedBody);
 
     } catch (err) {
@@ -100,31 +94,6 @@ async function endpointSimulator(req, res) {
             details: err.message
         });
     }
-}
-
-
-function matchPath(requestParts, endpointParts) {
-    if (requestParts.length !== endpointParts.length) {
-        return null;
-    }
-
-    const params = {};
-
-    for (let i = 0; i < requestParts.length; i++) {
-        const requestPart = requestParts[i];
-        const endpointPart = endpointParts[i];
-
-        if (endpointPart.startsWith(':')) {
-            const paramName = endpointPart.slice(1);
-            params[paramName] = requestPart;
-            continue;
-        }
-        if (requestPart !== endpointPart) {
-            return null;
-        }
-    }
-
-    return params;
 }
 
 module.exports = endpointSimulator;
