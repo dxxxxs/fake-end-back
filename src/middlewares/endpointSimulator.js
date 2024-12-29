@@ -4,6 +4,10 @@ const parseurl = require('parseurl');
 const endpointRepository = require('../repositories/endpoint.repository');
 
 function generateFakerData(template) {
+    if (!/^faker\.\w+/.test(template.trim())) {
+        console.error('Invalid Faker template:', template);
+        return null;
+    }
     try {
         return new Function('faker', `return ${template}`)(faker);
     } catch (err) {
@@ -12,7 +16,9 @@ function generateFakerData(template) {
     }
 }
 
+
 function processResponse(response, pathParams = {}) {
+
     if (typeof response === 'object' && response !== null) {
         const processed = Array.isArray(response) ? [] : {};
 
@@ -25,7 +31,11 @@ function processResponse(response, pathParams = {}) {
 
     if (typeof response === 'string' && response.startsWith(':')) {
         const paramName = response.slice(1);
-        return pathParams[paramName] || null;
+        if (typeof pathParams[paramName] === 'undefined') {
+            console.warn(`Missing path parameter: ${paramName}`);
+            return null;
+        }
+        return pathParams[paramName];
     }
 
     if (typeof response === 'string' && response.includes('faker.')) {
@@ -49,19 +59,17 @@ async function endpointSimulator(req, res) {
             return res.status(404).json({ error: 'No endpoints configured' });
         }
 
-        let matchedEndpoint;
         let pathParams = {};
 
-        for (const endpoint of endpoints) {
+        const matchedEndpoint = endpoints.find(endpoint => {
             const matchFn = match(endpoint.path, { decode: decodeURIComponent });
             const matched = matchFn(fullPath);
-
             if (matched && endpoint.method === method) {
-                matchedEndpoint = endpoint;
                 pathParams = matched.params;
-                break;
+                return true;
             }
-        }
+            return false;
+        });
 
         if (!matchedEndpoint) {
             return res.status(404).json({ error: 'Endpoint not found or inactive' });
@@ -80,9 +88,9 @@ async function endpointSimulator(req, res) {
             }
         }
 
-        if (responseDelay) {
-            await new Promise(resolve => setTimeout(resolve, responseDelay));
-        }
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+        if (responseDelay) await delay(responseDelay);
+
 
         const processedBody = processResponse(responseBody || {}, pathParams);
         return res.status(statusCode || 200).json(processedBody);
