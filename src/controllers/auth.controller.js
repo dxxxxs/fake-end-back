@@ -27,10 +27,11 @@ async function login(req, res) {
 
         const { user, token } = await login.execute({ email, password });
 
+        res.setHeader('x-auth-token', token);
         return res.status(200).json({
             message: 'User logged in successfully',
             _id: user._id,
-            token
+            username: user.username
         });
 
     } catch (err) {
