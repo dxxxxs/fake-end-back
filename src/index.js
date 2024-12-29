@@ -9,7 +9,12 @@ const app = express();
 
 dotenv.config();
 
-app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    exposedHeaders: ['x-auth-token']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(router);
