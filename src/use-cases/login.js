@@ -1,14 +1,11 @@
 const userRepository = require('../repositories/user.repository');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
+const GenerateToken = require('./generate-token')
 
 
 class Login {
     async execute({ email, password }) {
         const user = await userRepository.getUserByEmail(email);
-
-        const secret = process.env.JWT_SECRET;
 
         if (!user || user.deletedAt) {
             throw new Error('User not found');
@@ -20,7 +17,9 @@ class Login {
             throw new Error('Password is not valid');
         }
 
-        const token = jwt.sign({ _id: user._id, username: user.username, email: user.email }, secret);
+        const generateToken = new GenerateToken();
+
+        const token = await generateToken.execute({ user_id: user._id, username: user.username, email: user.email })
 
         return { user, token };
     }
