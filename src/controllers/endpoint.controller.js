@@ -5,7 +5,8 @@ const GetAllEndpoints = require('../use-cases/get-all-endpoints');
 
 async function createEndpoint(req, res) {
     try {
-        const { endpointData } = req.body;
+        const endpointData = req.body;
+
         const { _id } = req.decoded;
 
         const createEndpoint = new CreateEndpoint();
@@ -18,6 +19,7 @@ async function createEndpoint(req, res) {
         });
 
     } catch (err) {
+        console.log(err)
         return res.status(500).json({ error: 'An error occurred while creating the endpoint', details: err.message });
     }
 }
