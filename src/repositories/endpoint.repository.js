@@ -1,4 +1,9 @@
 const getEndpointModel = require('../models/endpoint.model');
+const {
+    DatabaseError,
+    EndpointNotFoundError,
+    InvalidEndpointDataError
+} = require('../utils/errors/CustomError');
 
 async function createEndpoint(userId, endpointData) {
     try {
@@ -9,9 +14,8 @@ async function createEndpoint(userId, endpointData) {
         await newEndpoint.save();
 
         return newEndpoint;
-
     } catch (err) {
-        throw new Error(`Failed to create endpoint: ${err.message}`);
+        throw new DatabaseError(`Failed to create endpoint: ${err.message}`);
     }
 }
 
@@ -22,13 +26,13 @@ async function deleteEndpoint(userId, endpointId) {
         const result = await EndpointModel.findByIdAndDelete(endpointId);
 
         if (!result) {
-            throw new Error('Endpoint not found');
+            throw new EndpointNotFoundError(`Endpoint with ID ${endpointId} not found`);
         }
 
         return result;
-
     } catch (err) {
-        throw new Error(`Failed to delete endpoint: ${err.message}`);
+        if (err instanceof EndpointNotFoundError) throw err;
+        throw new DatabaseError(`Failed to delete endpoint: ${err.message}`);
     }
 }
 
@@ -39,9 +43,8 @@ async function getEndpoints(userId) {
         const userEndpoints = await EndpointModel.find({});
 
         return userEndpoints;
-
     } catch (err) {
-        throw new Error(`Failed to get endpoints: ${err.message}`);
+        throw new DatabaseError(`Failed to get endpoints: ${err.message}`);
     }
 }
 
@@ -52,9 +55,8 @@ async function getEndpointByPathAndMethod(userId, path, method) {
         const endpoint = await EndpointModel.findOne({ path, method });
 
         return endpoint;
-
     } catch (err) {
-        throw new Error(`Failed to find endpoint by path and method: ${err.message}`);
+        throw new DatabaseError(`Failed to find endpoint by path and method: ${err.message}`);
     }
 }
 
@@ -64,10 +66,14 @@ async function getEndpointById(userId, endpointId) {
 
         const endpoint = await EndpointModel.findById(endpointId);
 
-        return endpoint;
+        if (!endpoint) {
+            throw new EndpointNotFoundError(`Endpoint with ID ${endpointId} not found`);
+        }
 
+        return endpoint;
     } catch (err) {
-        throw new Error(`Failed to find endpoint by _id: ${err.message}`);
+        if (err instanceof EndpointNotFoundError) throw err;
+        throw new DatabaseError(`Failed to find endpoint by _id: ${err.message}`);
     }
 }
 
@@ -82,13 +88,13 @@ async function updateEndpoint(userId, endpointId, updateData) {
         );
 
         if (!updatedEndpoint) {
-            throw new Error('Endpoint not found');
+            throw new EndpointNotFoundError(`Endpoint with ID ${endpointId} not found`);
         }
 
         return updatedEndpoint;
-
     } catch (err) {
-        throw new Error(`Failed to update endpoint: ${err.message}`);
+        if (err instanceof EndpointNotFoundError) throw err;
+        throw new DatabaseError(`Failed to update endpoint: ${err.message}`);
     }
 }
 

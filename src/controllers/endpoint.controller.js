@@ -19,8 +19,11 @@ async function createEndpoint(req, res) {
         });
 
     } catch (err) {
-        console.log(err)
-        return res.status(500).json({ error: 'An error occurred while creating the endpoint', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 
@@ -39,7 +42,11 @@ async function deleteEndpoint(req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({ error: 'An error ocurred while deleting the endpoint', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 
@@ -59,7 +66,11 @@ async function updateEndpoint(req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({ error: 'An error ocurred while updating the endpoint', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 
@@ -76,7 +87,11 @@ async function getEndpoints(req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({ error: 'An error ocurred while getting the endpoints', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 

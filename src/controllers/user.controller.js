@@ -16,7 +16,11 @@ async function createUser(req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({ error: 'An error occurred while creating the user', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 
@@ -34,7 +38,11 @@ async function deleteUser(req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({ error: 'An error occurred while deleting the user', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 
@@ -53,7 +61,11 @@ async function updateUser(req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({ error: 'An error occurred while updating the user', details: err.message });
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'An unexpected error occurred', details: err.message });
     }
 }
 

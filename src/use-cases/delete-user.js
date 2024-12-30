@@ -1,4 +1,5 @@
 const userRepository = require('../repositories/user.repository');
+const { AuthenticationError } = require('../utils/errors/CustomError');
 
 class DeleteUser {
     async execute(_id) {
@@ -6,7 +7,7 @@ class DeleteUser {
         const user = await userRepository.getUserById(_id);
 
         if (!user) {
-            throw new Error('User does not exists');
+            throw new AuthenticationError('User does not exists');
         }
 
         const deleted = await userRepository.deleteUser(_id);

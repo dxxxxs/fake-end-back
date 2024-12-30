@@ -1,5 +1,6 @@
 const userRepository = require('../repositories/user.repository');
 const bcrypt = require('bcrypt');
+const { InvalidCredentialsError, AuthenticationError } = require('../utils/errors/CustomError');
 
 class UpdateUser {
     async execute({ _id, password, newPassword, newUsername }) {
@@ -7,13 +8,13 @@ class UpdateUser {
         const user = await userRepository.getUserById(_id);
 
         if (!user) {
-            throw new Error('User does not exists');
+            throw new AuthenticationError('User does not exists');
         }
 
         const checkPassword = await bcrypt.compare(password, user.password);
 
         if (!checkPassword) {
-            throw new Error('Password given does not match');
+            throw new InvalidCredentialsError('Password given does not match');
         }
 
         let newPasswordHashed;
@@ -21,7 +22,7 @@ class UpdateUser {
         if (newPassword) {
 
             if (newPassword.length < 8) {
-                throw new Error('Password must be at least 8 characters long');
+                throw new InvalidCredentialsError('Password must be at least 8 characters long');
             }
 
             newPasswordHashed = await bcrypt.hash(newPassword, 10);

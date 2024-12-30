@@ -1,5 +1,10 @@
 const jwt = require('jsonwebtoken');
 const GenerateToken = require('../use-cases/generate-token');
+const {
+    TokenExpiredError,
+    InvalidTokenError,
+    AuthenticationError
+} = require('../utils/errors/CustomError');
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -7,14 +12,21 @@ const authMiddleware = async (req, res, next) => {
         const authHeader = req.headers['authorization'];
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(403).json({
-                success: false,
-                message: 'Not logged in',
-            });
+            throw new AuthenticationError('Authorization header missing or malformed');
         }
 
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, secret);
+        let decoded;
+
+        try {
+            decoded = jwt.verify(token, secret);
+        } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+                throw new TokenExpiredError('Token has expired');
+            } else {
+                throw new InvalidTokenError('Invalid token');
+            }
+        }
 
         const now = Math.floor(Date.now() / 1000);
         const timeLeft = decoded.exp - now;
@@ -33,10 +45,13 @@ const authMiddleware = async (req, res, next) => {
 
         req.decoded = decoded;
         next();
-    } catch (error) {
-        res.status(403).json({
+    } catch (err) {
+        if (err instanceof CustomError) {
+            return res.status(err.statusCode).json({ error: err.message, details: err.details });
+        }
+        return res.status(403).json({
             success: false,
-            message: error.message || 'Failed to authenticate token',
+            message: err.message || 'Failed to authenticate token',
         });
     }
 };
